@@ -1,13 +1,15 @@
-package net.minecraft.src;
+package net.minecraft.client.bot;
 
-import net.minecraft.client.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 
 public class MBPlayerControllerMP extends PlayerControllerMP
 {
 	
 	public boolean flag = true;
 
-	public MBPlayerControllerMP(Minecraft par1Minecraft, NetClientHandler par2NetClientHandler) {
+	public MBPlayerControllerMP(Minecraft par1Minecraft, NetHandlerPlayClient par2NetClientHandler) {
 		
 		super(par1Minecraft, par2NetClientHandler);
 		

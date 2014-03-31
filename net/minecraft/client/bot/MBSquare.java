@@ -1,6 +1,6 @@
-package net.minecraft.src;
+package net.minecraft.client.bot;
 
-import net.minecraft.src.MinecraftBot.MBVec;
+import net.minecraft.client.bot.MinecraftBot.MBVec;
 
 public class MBSquare {
 

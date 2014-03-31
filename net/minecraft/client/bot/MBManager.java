@@ -1,8 +1,11 @@
-package net.minecraft.src;
+package net.minecraft.client.bot;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EmptyStackException;
+import java.util.Stack;
 
-import net.minecraft.src.MinecraftBot.*;
+import net.minecraft.client.bot.MinecraftBot.*;
+import net.minecraft.client.settings.KeyBinding;
 
 public class MBManager {
 
@@ -33,7 +36,6 @@ public class MBManager {
 		botList.clear();
 		step = 0;
 		KeyBinding.unPressAllKeys();
-
 	}
 	
 	public static MBManager searchAndReach(MinecraftBot mb, int[] items){
@@ -89,23 +91,16 @@ public class MBManager {
 			if(macroId == 1){
 				
 				runChopStuff();
-				
 			}else if(macroId == 2){
 				
 				runChopSquare();
-				
 			}else if(macroId == 3){
 				
 				runSearchAndReach();
-				
 			}
-		
 		}
-		
 		runBots();
-
 		return MANAGER_RETURN.KEEP_RUNNING;
-
 	}
 	
 	private boolean runOptions(){
@@ -113,10 +108,8 @@ public class MBManager {
 		if(mb.mc.thePlayer.getBrightness(1) < mb.TORCH_THRESHOLD && mb.tools.countItems(mb.ITEMS_TORCH) > 0 && mb.new MBVec(0, -1, 0).getId() == 0){
 			
 			botList.add(mb.new BotBuilder(mb.new MBVec(0, -1, 0), mb.ITEMS_TORCH));
-			
 			return true;
 		}
-		
 		return false;
 	}
 	
@@ -124,7 +117,6 @@ public class MBManager {
 		
 		/* Second step: Destination reached */
 		if(step == 2 && botList.size() == 0){
-			
 			step = 0;
 		}
 		
@@ -139,7 +131,6 @@ public class MBManager {
 				botList.clear();
 				step = 0;
 			}
-
 		}
 	}
 	
@@ -196,7 +187,6 @@ public class MBManager {
 	private void runChopStuff(){
 		
 		try{
-		
 			/* Fourth step: Target collected? Acquire new target. */
 			if((step == 4 || step == 5) && botList.size() == 0){
 				
@@ -242,9 +232,7 @@ public class MBManager {
 				step = 2;
 				System.out.println("First Step");
 			}
-		
 		}catch(EmptyStackException e){
-			
 			step = 0;
 		}
 	}
@@ -257,14 +245,12 @@ public class MBManager {
 			((MBPlayerControllerMP)(mb.mc.playerController)).flag = true;
 			return false;
 		}
-		
 		return true;
 	}
 	
 	private void runBots(){
 		
 		if(botList.size() > 0){
-			
 			botList.peek().run(botList);
 		}
 	}

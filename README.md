@@ -4,23 +4,23 @@ Everything needed to update the bot is to update the sections listed below:
 
 
 -------------------------------
-NetClientHandler.java
+net.minecraft.client.network.NetHandlerPlayClient.java
 -------------------------------
     
-    import net.minecraft.src.MinecraftBot;
+    import net.minecraft.client.bot.MinecraftBot;
     
     /** MinecraftBot instance */
     public MinecraftBot mBot;
 
-    public void handleLogin(Packet1Login par1Packet1Login)
+    public void handleJoinGame(S01PacketJoinGame p_147282_1_)
     {
 	(...)
-	mBot = new MinecraftBot(mc);
+	mBot = new MinecraftBot(this.gameController);
     }
 	
 	
 -------------------------------
-EntityClientPlayerMP.java
+net.minecraft.client.entity.EntityClientPlayerMP.java
 -------------------------------
     
     public void onUpdate()
@@ -31,5 +31,13 @@ EntityClientPlayerMP.java
 
     public void sendChatMessage(String par1Str)
     {
-    	if(!this.sendQueue.mBot.chat.isForBot(par1Str)) this.sendQueue.addToSendQueue(new Packet3Chat(par1Str));
+    	if(!this.sendQueue.mBot.chat.isForBot(par1Str)) this.sendQueue.addToSendQueue(new C01PacketChatMessage(par1Str));
     }
+
+
+-------------------------------
+Re-Obscure (/MCPxxx/conf/joined.srg) - Minecraft v1.7.2
+-------------------------------
+EntityClientPlayerMP.java -> bje.class
+NetHandlerPlayClient.java -> biv.class
+NetHandlerPlayClient$1.class -> biw.class

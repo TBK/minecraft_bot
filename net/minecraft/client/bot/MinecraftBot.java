@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package net.minecraft.client.bot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,12 +7,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.*;
-import net.minecraft.src.KeyBinding;
-import net.minecraft.src.MBManager.MANAGER_RETURN;
-import net.minecraft.src.MBSquare;
-import net.minecraft.src.MathHelper;
-import net.minecraft.src.Vec3;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.bot.MBManager.MANAGER_RETURN;
+import net.minecraft.client.bot.MBSquare;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 
 public class MinecraftBot {
 
@@ -58,9 +64,10 @@ public class MinecraftBot {
 	public double TORCH_THRESHOLD = 0.2;
 	
 	/** KeyBinding */
-	public static KeyBinding keyBindBotPause = new KeyBinding("Bot v2 Pause", 23);
-	public static KeyBinding keyBindBotMenu = new KeyBinding("Bot v2 Menu", 24);
-	public static KeyBinding keyBindBotMacro = new KeyBinding("Bot v2 Macro", 25);
+	public static KeyBinding keyBindBotPause = new KeyBinding("Bot Pause", 23, "key.categories.misc");
+	public static KeyBinding keyBindBotMenu = new KeyBinding("Bot Menu", 24, "key.categories.misc");
+	public static KeyBinding keyBindBotMacro = new KeyBinding("Bot Macro", 25, "key.categories.misc");
+	
 	/** Initialize everything. */
 	public MinecraftBot(Minecraft parMc){
 		
@@ -104,7 +111,6 @@ public class MinecraftBot {
         	lastTick = System.currentTimeMillis();
         	tickCount = 0;
         }
-        	
 	}
 	
 	public static KeyBinding keyList[] = {keyBindBotPause, keyBindBotMenu, keyBindBotMacro};
@@ -210,14 +216,12 @@ public class MinecraftBot {
 							else{ btnJump = false; btnSneak = false;}
 						btnForward = true;
 					}
-					
 				} else {
 					
 					unpressAll();
 					refreshKeys();
 					lst.pop();
 					return;
-					
 				}
 			} else if (path.aStar == null) {
 
@@ -226,7 +230,6 @@ public class MinecraftBot {
 				lst.pop();
 				return;
 			}
-			
 			refreshKeys();
 			return;
 		}
@@ -243,10 +246,10 @@ public class MinecraftBot {
 		/** Refresh Keys */
 		public void refreshKeys(){
 			
-	        if (mc.gameSettings.keyBindForward.pressed != btnForward) mc.gameSettings.keyBindForward.pressed = btnForward;
-	        if (mc.gameSettings.keyBindBack.pressed != btnBackward) mc.gameSettings.keyBindBack.pressed = btnBackward;
-	        if (mc.gameSettings.keyBindJump.pressed != btnJump) mc.gameSettings.keyBindJump.pressed = btnJump;
-	        if (mc.gameSettings.keyBindSneak.pressed != btnSneak) mc.gameSettings.keyBindSneak.pressed = btnSneak;
+	        if (mc.gameSettings.keyBindForward.getIsKeyPressed() != btnForward) mc.gameSettings.keyBindForward.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), btnForward);
+			if (mc.gameSettings.keyBindBack.getIsKeyPressed() != btnBackward) mc.gameSettings.keyBindBack.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), btnBackward);
+	        if (mc.gameSettings.keyBindJump.getIsKeyPressed() != btnJump) mc.gameSettings.keyBindJump.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), btnJump);
+	        if (mc.gameSettings.keyBindSneak.getIsKeyPressed() != btnSneak) mc.gameSettings.keyBindSneak.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), btnSneak);
 		}
 		
 		private MBVec getNextStep() {
@@ -256,7 +259,6 @@ public class MinecraftBot {
 				//path.path = null; 
 				return null;
 			}
-			
 			return path.path.peek();
 		}
 	}
@@ -305,12 +307,11 @@ public class MinecraftBot {
 					mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, tmpSlot, 0, 0, mc.thePlayer);
 				}
 			}
-
 		}
 		
 		public boolean isHoldingItems(){
 			
-			int itemId = mc.thePlayer.getCurrentEquippedItem() == null ? -1 : mc.thePlayer.getCurrentEquippedItem().itemID;
+			int itemId = mc.thePlayer.getCurrentEquippedItem() == null ? -1 : Item.getIdFromItem(mc.thePlayer.getCurrentEquippedItem().getItem());
 			return Arrays.binarySearch(targetItems, itemId) >= 0;
 		}
 		
@@ -326,14 +327,13 @@ public class MinecraftBot {
 				for(int j = 0; j < targetItems.length; j++){
 					
 					// currTargetItem is used to determine tools priority
-					if(currStack != null && currStack.getItem().itemID == targetItems[j] && currTargetItem > j){
+					if(currStack != null && Item.getIdFromItem(currStack.getItem()) == targetItems[j] && currTargetItem > j){
 						
 						targetSlot = i;
 						currTargetItem = j;
 					}
 				}
 			}
-			
 			return targetSlot;
 		}
 	}
@@ -368,12 +368,11 @@ public class MinecraftBot {
 			if (scanner.scanVec(target, BLOCKS_EMPTY_LAVA_WATER_FIRE)){
 
 				if(lag == 0){
-					mc.gameSettings.keyBindAttack.pressed = false;
+					mc.gameSettings.keyBindAttack.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
 					lst.pop();
 					return;
 				}else lag--;
 			}
-			
 			return;
 		}
 		
@@ -415,31 +414,31 @@ public class MinecraftBot {
 			parTarget.side = face;
 			
 			switch(face){
-			case 5:{
-				parTarget.xCoord += 0.49;
-				break;
+				case 5:{
+					parTarget.xCoord += 0.49;
+					break;
+				}
+				case 4:{
+					parTarget.xCoord -=0.49;
+					break;
+				}
+				case 3:{
+					parTarget.zCoord += 0.49;
+					break;
+				}
+				case 2:{
+					parTarget.zCoord -= 0.49;
+					break;
+				}
 			}
-			case 4:{
-				parTarget.xCoord -=0.49;
-				break;
-			}
-			case 3:{
-				parTarget.zCoord += 0.49;
-				break;
-			}
-			case 2:{
-				parTarget.zCoord -= 0.49;
-				break;
-			}
-			}
-			
 		}
 		
 		private void damageBlock(){
 			
 			tools.lookAt(target);
 			/*if(target.side != 0) mc.playerController.onPlayerDamageBlock(target.xInt(), target.yInt(), target.zInt(), target.getSide());
-			else */mc.gameSettings.keyBindAttack.pressed = true;
+			else mc.gameSettings.keyBindAttack.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);*/
+			mc.gameSettings.keyBindAttack.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), true);
 			mc.thePlayer.swingItem();
 
 			/*
@@ -475,7 +474,7 @@ public class MinecraftBot {
 			
 			if(inventory.isHoldingItems()){
 				tools.lookAt(target_bis);
-				mc.thePlayer.sendQueue.addToSendQueue(new Packet15Place(target_bis.xInt(), target_bis.yInt(), target_bis.zInt(), target_bis.getSide(), mc.thePlayer.inventory.getCurrentItem(), (float)target_bis.hitVec().xCoord, (float)target_bis.hitVec().yCoord, (float)target_bis.hitVec().zCoord));
+				mc.thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(target_bis.xInt(), target_bis.yInt(), target_bis.zInt(), target_bis.getSide(), mc.thePlayer.inventory.getCurrentItem(), (float)target_bis.hitVec().xCoord, (float)target_bis.hitVec().yCoord, (float)target_bis.hitVec().zCoord));
 				mc.thePlayer.swingItem();
 			}
 			
@@ -566,7 +565,7 @@ public class MinecraftBot {
 			
 			protected int h(){ return 15 * (Math.abs(x2 - this.x) + Math.abs(y2 - this.y) + Math.abs(z2 - this.z));}
 			protected int f(){ return g+h;}
-			protected int getId(int x, int y, int z){ return mc.theWorld.getBlockId(x, y, z);}
+			protected int getId(int x, int y, int z){ return Block.getIdFromBlock(mc.theWorld.getBlock(x, y, z));}
 			protected int[] getIds(){ 
 				
 				int[] intList = new int[21];
@@ -669,8 +668,8 @@ public class MinecraftBot {
 			public int compareTo(Node o){return this.f - o.f;}
 			@Override public boolean equals(Object o){if(o.getClass()!=this.getClass())return false;
 													  return ((Node)o).x==this.x&&((Node)o).y==this.y&&((Node)o).z==this.z;}
-		
 		}
+		
 		private class NodeReach extends Node{
 			
 			protected NodeReach(Node parParent, int parx, int pary, int parz, int parx2, int pary2, int parz2, int parg){this(parParent, parx, pary, parz, parx2, pary2, parz2, 0, 0, 0, parg);}
@@ -751,8 +750,8 @@ public class MinecraftBot {
 					
 				return broList;
 			}
-		
 		}
+		
 		private class NodeSearch extends Node{
 			
 			private int items[] = null;
@@ -1118,8 +1117,8 @@ public class MinecraftBot {
 						 	    return (double)MathHelper.sqrt_double(var2 * var2 + var4 * var4 + var6 * var6);}
 
 		int getId(){ return getId(0, 0, 0);}
-		int getId(int dx, int dy, int dz){ return mc.theWorld.getBlockId(xInt() + tools.relX2Abs(dx, dz), yInt() + tools.relY2Abs(dy), zInt() + tools.relZ2Abs(dx, dz));}
-		int getId(double dx, double dy, double dz){ return mc.theWorld.getBlockId(xInt(dx), yInt(dy), zInt(dz));}
+		int getId(int dx, int dy, int dz){ return Block.getIdFromBlock(mc.theWorld.getBlock(xInt() + tools.relX2Abs(dx, dz), yInt() + tools.relY2Abs(dy), zInt() + tools.relZ2Abs(dx, dz)));}
+		int getId(double dx, double dy, double dz){ return Block.getIdFromBlock(mc.theWorld.getBlock(xInt(dx), yInt(dy), zInt(dz)));}
 
 		/* Duplicate this Vec adding dx, dy, dz as offset */
 		MBVec getVec(){ return new MBVec(xCoord, yCoord, zCoord, side, false);}
@@ -1156,9 +1155,9 @@ public class MinecraftBot {
 	/** Random tools */
 	class MBTools {
 
-		void p(String msg){ System.out.println("MinecraftBot: " + msg);}
-		void s(String msg){ mc.ingameGUI.getChatGUI().printChatMessage("§6Bot: " + msg);}
-			
+		void p(String msg){ System.out.println("MinecraftBot: " + msg); }
+		void s(String msg){ mc.thePlayer.addChatComponentMessage(new ChatComponentText("§6Bot: " + msg)); }
+		
 		int relX2Abs(int parX, int parZ){int buff; switch(rY(mc.thePlayer.rotationYaw)){ case 270:case -90:buff = parZ; break; case 180: case -180: buff = parX; break; case 90: case -270: buff = -parZ; break; default: buff = -parX;} return buff;}
 		int relY2Abs(int parY){ return parY;}
 		int relZ2Abs(int parX, int parZ){int buff; switch(rY(mc.thePlayer.rotationYaw)){ case 270:case -90:buff = parX; break; case 180: case -180: buff = -parZ; break; case 90: case -270: buff = -parX; break; default: buff = parZ;} return buff;}
@@ -1175,11 +1174,11 @@ public class MinecraftBot {
 					    if(a<-315||(a>=-45&&a<=0))rounded=0;
 					    return rounded;}
 
-		private void lookAt(Vec3 vec){ lookAt(yawFromVec(vec), pitchFromVec(vec));}
-		private void lookAt(Vec3 vec, float pitch){ lookAt(yawFromVec(vec),  pitch);}
-		private void lookAt(float yaw, float pitch){ mc.thePlayer.setRotation(yaw,  pitch);}
+		private void lookAt(Vec3 vec){ lookAt(yawFromVec(vec), pitchFromVec(vec)); }
+		private void lookAt(Vec3 vec, float pitch){ lookAt(yawFromVec(vec), pitch); }
+		private void lookAt(float yaw, float pitch){ mc.thePlayer.setAngles(yaw, pitch); }
 
-		int getSide(){float tmpY = rY(mc.thePlayer.rotationYaw);return tmpY==0.0? 3: tmpY==90.0? 4: tmpY==180.0? 2: 5;} // Associate player yaw to block side
+		int getSide(){ float tmpY = rY(mc.thePlayer.rotationYaw); return tmpY == 0.0 ? 3 : tmpY == 90.0 ? 4 : tmpY == 180.0 ? 2 : 5; } // Associate player yaw to block side
 		MBVec getBlockFromSide(MBVec vec){MBVec tmpVec = vec.getVec(); switch(vec.getSide()){case 2:{tmpVec.zCoord -= 1; break;} case 3:{tmpVec.zCoord += 1; break;} case 4:{tmpVec.xCoord -= 1; break;} case 5:{tmpVec.xCoord += 1; break;} case 1:{tmpVec.yCoord += 1; break;} case 0:{tmpVec.yCoord -= 1; break;} }; return tmpVec;} // Associate player yaw to block side
 		
 		private float yawFromVec(Vec3 target){ return yawFrom2Vec(mc.thePlayer.getPosition(1), target);}
@@ -1193,10 +1192,9 @@ public class MinecraftBot {
 			
 			for(int i = 0; i < mc.thePlayer.inventoryContainer.inventorySlots.size(); i++){
 				
-				if(mc.thePlayer.inventoryContainer.getSlot(i).getStack() != null && Arrays.binarySearch(items, mc.thePlayer.inventoryContainer.getSlot(i).getStack().itemID) >= 0)
+				if(mc.thePlayer.inventoryContainer.getSlot(i).getStack() != null && Arrays.binarySearch(items, Item.getIdFromItem(mc.thePlayer.inventoryContainer.getSlot(i).getStack().getItem())) >= 0)
 					count += mc.thePlayer.inventoryContainer.getSlot(i).getStack().stackSize;
 			}
-			
 			return count;
 		}
 	}
