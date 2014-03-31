@@ -15,13 +15,11 @@ public class MBSquare {
 	MBSquare(MinecraftBot parMb){
 		
 		this(parMb, 3, 3, 1);
-		
 	}
 
 	MBSquare(MinecraftBot parMb, int parZ, int parX, int parY){
 		
 		this(parMb, parZ, parX, parY, false);
-		
 	}
 
 	MBSquare(MinecraftBot parMb, int parZ, int parX, int parY, boolean parLeft){
@@ -33,7 +31,6 @@ public class MBSquare {
 		dx = parX;
 		dy = -parY;
 		dz = parZ;
-		
 	}
 	
 	public MBVec next(){
@@ -59,7 +56,6 @@ public class MBSquare {
 				}
 			}
 		}
-		
 		return finalVec(cx, cy, cz);
 	}
 	
@@ -69,33 +65,31 @@ public class MBSquare {
 		int buffx = 0, buffy, buffz = 0;
 		
 		switch (yaw){
-
-		case 0:{
-			if(left) buffx = parX;
-			else buffx = -parX;
-			buffz = parZ;
-			break;
+			case 0:{
+				if(left) buffx = parX;
+				else buffx = -parX;
+				buffz = parZ;
+				break;
+			}
+			case 90:{
+				if(left) buffz = parX;
+				else buffz = -parX;
+				buffx = -parZ;
+				break;
+			}
+			case 180:{
+				if(left) buffx = -parX;
+				else buffx = parX;
+				buffz = -parZ;
+				break;
+			}
+			case 270:{
+				if(left) buffz = -parX;
+				else buffz = parX;
+				buffx = parZ;
+				break;
+			}
 		}
-		case 90:{
-			if(left) buffz = parX;
-			else buffz = -parX;
-			buffx = -parZ;
-			break;
-		}
-		case 180:{
-			if(left) buffx = -parX;
-			else buffx = parX;
-			buffz = -parZ;
-			break;
-		}
-		case 270:{
-			if(left) buffz = -parX;
-			else buffz = parX;
-			buffx = parZ;
-			break;
-		}
-		}
-		
 		buffy = parY;
 		
 		return mb.new MBVec(finalVec.xCoord + buffx, finalVec.yCoord + buffy, finalVec.zCoord + buffz);

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Stack;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.*;
+import net.minecraft.client.*; //TODO replace with correct imports
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.bot.MBManager.MANAGER_RETURN;
