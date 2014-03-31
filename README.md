@@ -38,6 +38,9 @@ net.minecraft.client.entity.EntityClientPlayerMP.java
 -------------------------------
 Re-Obscure (/MCPxxx/conf/joined.srg) - Minecraft v1.7.2
 -------------------------------
-EntityClientPlayerMP.java -> bje.class
-NetHandlerPlayClient.java -> biv.class
-NetHandlerPlayClient$1.class -> biw.class
+    
+    EntityClientPlayerMP.java -> bje.class
+	
+    NetHandlerPlayClient.java -> biv.class
+	
+    NetHandlerPlayClient$1.class -> biw.class
