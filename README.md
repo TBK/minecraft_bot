@@ -1,7 +1,9 @@
-minecraft_bot
+Thaum the (Minecraft) Bot
 =============
-Everything needed to update the bot is to update the sections listed below:
+https://twitter.com/thaumoctopus
+http://www.minecraftforum.net/topic/1119789-164-snakses-mining-bot-v21-for-survival-maps/
 
+Everything needed to update the bot is to update the sections listed below:
 
 -------------------------------
 net.minecraft.client.network.NetHandlerPlayClient.java
