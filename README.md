@@ -4,9 +4,10 @@ https://twitter.com/thaumoctopus
 http://www.minecraftforum.net/topic/1119789-164-snakses-mining-bot-v21-for-survival-maps/
 
 Everything needed to update the bot:
-1. Decompile MC (client) with MCP.
 
-2. Add the modifications listed below: 
+1) Decompile MC (client) with MCP.
+
+2) Add the modifications listed below: 
 
 -------------------------------
 net.minecraft.client.network.NetHandlerPlayClient.java
@@ -39,9 +40,9 @@ net.minecraft.client.entity.EntityClientPlayerMP.java
     	if(!this.sendQueue.mBot.chat.isForBot(par1Str)) this.sendQueue.addToSendQueue(new C01PacketChatMessage(par1Str));
     }
 
-3. Recompile (with MCP).
+3) Recompile (with MCP).
 
-4. Re-Obscure (/MCPxxx/conf/joined.srg - Minecraft v1.7.2) the MC files:
+4) Re-Obscure (/MCPxxx/conf/joined.srg - Minecraft v1.7.2) the MC files:
 
     
     EntityClientPlayerMP.java -> bje.class
