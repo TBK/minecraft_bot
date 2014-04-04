@@ -1,7 +1,9 @@
 Thaum the (Minecraft) Bot
 =============
 https://twitter.com/thaumoctopus
+
 http://www.minecraftforum.net/topic/1119789-164-snakses-mining-bot-v21-for-survival-maps/
+
 
 Everything needed to update the bot:
 
