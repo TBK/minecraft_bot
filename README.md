@@ -45,10 +45,19 @@ net.minecraft.client.entity.EntityClientPlayerMP.java
 3) Recompile (with MCP).
 
 4) Re-Obscure (/MCPxxx/conf/joined.srg - Minecraft v1.7.2) the MC files:
-
     
     EntityClientPlayerMP.java -> bje.class
 	
     NetHandlerPlayClient.java -> biv.class
 	
     NetHandlerPlayClient$1.class -> biw.class
+
+5) Add language strings (.minecraft\assets\virtual\legacy\lang\en_US.lang):
+
+	key.categories.bot=Bot
+	
+	key.botPause=Bot Pause
+	
+	key.botMenu=Bot Menu
+	
+	key.botMacro=Bot Macro

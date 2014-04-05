@@ -67,14 +67,14 @@ public class MinecraftBot {
 	private static int LAG = 5;
 	public double TORCH_THRESHOLD = 0.2;
 
-	/** KeyBinding */
-	public static KeyBinding keyBindBotPause = new KeyBinding("Bot Pause", 23,
-			"key.categories.misc");
-	public static KeyBinding keyBindBotMenu = new KeyBinding("Bot Menu", 24,
-			"key.categories.misc");
-	public static KeyBinding keyBindBotMacro = new KeyBinding("Bot Macro", 25,
-			"key.categories.misc");
-
+	/** KeyBinding - http://minecraft.gamepedia.com/Key_codes */
+	public static KeyBinding keyBindBotPause = new KeyBinding("key.botPause", 23,
+			"key.categories.bot"); // "I"
+	public static KeyBinding keyBindBotMenu = new KeyBinding("key.botMenu", 24,
+			"key.categories.bot"); // "O"
+	public static KeyBinding keyBindBotMacro = new KeyBinding("key.botMacro", 25,
+			"key.categories.bot"); // "P"
+	
 	/** Initialize everything. */
 	public MinecraftBot(Minecraft parMc) {
 
