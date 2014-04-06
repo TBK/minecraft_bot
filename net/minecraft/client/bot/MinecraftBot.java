@@ -84,7 +84,7 @@ public class MinecraftBot {
 
 	/** KeyBinding - http://minecraft.gamepedia.com/Key_codes */
 	public static KeyBinding keyBindBotModeDemolisher = new KeyBinding(
-			"key.botModeMiner", 22, "key.categories.bot"); // "U"
+			"key.botModeDemolisher", 22, "key.categories.bot"); // "U"
 	public static KeyBinding keyBindBotModeWoodcutter = new KeyBinding(
 			"key.botModeWoodcutter", 23, "key.categories.bot"); // "I"
 	public static KeyBinding keyBindBotFacing = new KeyBinding("key.botFacing",
