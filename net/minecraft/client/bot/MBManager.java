@@ -46,7 +46,7 @@ public class MBManager {
 		return manager;
 	}
 
-	public static MBManager chopSquare(MinecraftBot mb, MBSquare mbSq) {
+	public static MBManager actionChopSquare(MinecraftBot mb, MBSquare mbSq) {
 		MBManager manager = new MBManager(mb);
 		manager.sq = mbSq;
 		manager.macroId = 2;
@@ -55,14 +55,57 @@ public class MBManager {
 		return manager;
 	}
 
-	public static MBManager chopStuff(MinecraftBot mb, int[] items) {
+	public static MBManager actionChopStuff(MinecraftBot mb, int[] items) {
 		MBManager manager = new MBManager(mb);
 		manager.items = items;
 		manager.botList.add(manager.mb.new BotPath(manager.mb.new MBVec(0, -1,
 				0), items, "MBManager Chopwood Path", true));
 		manager.macroId = 1;
 		manager.step = 1;
-		mb.tools.s("Chopper - Don't move!");
+		mb.tools.s("Logging - Don't move!");
+		return manager;
+	}
+
+	public static MBManager actionPause(MinecraftBot mb) {
+		MBManager manager = new MBManager(mb);
+		/**
+		 * TODO create code
+		 * 
+		 */
+		return manager;
+	}
+
+	public static MBManager menuModes(MinecraftBot mb) {
+		MBManager manager = new MBManager(mb);
+		/**
+		 * TODO design and create GUI for Modes menu Predefines modes -
+		 * demolisher, builder, farmer (field prep), farmer (harvest), farmer
+		 * (collect eggs), farmer (collect wool), farmer (butcher), hunter
+		 * (food), hunter (enemies), fisher, woodcutter, miner... and the
+		 * ability to create/edit/delete modes.
+		 */
+		return manager;
+	}
+
+	public static MBManager menuSettings(MinecraftBot mb) {
+		MBManager manager = new MBManager(mb);
+		/**
+		 * TODO design and create GUI for Settings menu Settings for stuff such
+		 * as "garbage" list, actions to take in certain circumstances - e.g.
+		 * when inventory is full:
+		 * - Dump stuff
+		 * - Run to storage
+		 * - ...
+		 */
+		return manager;
+	}
+
+	public static MBManager menuActions(MinecraftBot mb) {
+		MBManager manager = new MBManager(mb);
+		/**
+		 * TODO design and create GUI for Actions menu + add support for visual
+		 * selector (WorldEdit "axe")
+		 */
 		return manager;
 	}
 
@@ -71,7 +114,6 @@ public class MBManager {
 	}
 
 	public MANAGER_RETURN run() {
-
 		/*
 		 * Block creation/destruction flag in MBPlayerControllerMP. Must be set
 		 * to false when bot is running.
@@ -168,7 +210,6 @@ public class MBManager {
 					botList.add(mb.new BotBuilder(target.getVec(0, -1, 0),
 							mb.BLOCKS_BUILD));
 				}
-
 				step = 1;
 			}
 		}

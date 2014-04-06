@@ -43,6 +43,7 @@ public class MinecraftBot {
 	/** Constants */
 	private static int PATH_SEARCH_TIMEOUT = 5000;
 
+	/** Data values - http://minecraft.gamepedia.com/Data_values */
 	public static int[] BLOCKS_LAVA_WATER_FIRE = { 8, 9, 10, 11, 51 };
 	public static int[] BLOCKS_LAVA_WATER = { 8, 9, 10, 11 };
 	public static int[] BLOCKS_ORE = { 1, 4, 14, 15, 16, 21, 24, 48, 49, 56,
@@ -59,25 +60,49 @@ public class MinecraftBot {
 	public static final int[] ITEMS_PICKAXES = { 257, 270, 274, 278, 285 };
 	public static final int[] ITEMS_SHOVELS = { 256, 269, 273, 277, 284 };
 	public static final int[] ITEMS_AXES = { 258, 271, 275, 279, 286 };
+	public static final int[] ITEMS_HOES = { 291, 292, 293, 294 };
+	public static final int[] ITEMS_FISHPOLE = { 346 };
+
 	public static final int[] ITEMS_FOOD = { 297, 354, 366, 349, 320, 357, 322,
-			362, 360, 335, 39, 40, 282, 361, 363, 365, 349, 319, 260, 367, 295,
-			364, 353, 338, 296 };
+			362, 360, 335, 39, 40, 282, 361, 363, 365, 319, 260, 367, 295, 364,
+			353, 338, 296 };
+	public static final int[] ITEMS_FARM_PLANT_SEEDS = { 81, 295, 338, 361, 362 };
+	public static final double[] ITEMS_FARM_PLANT_RIPE = { 81.15, 86.7, 103.7,
+			295.7, 338.15 }; // State
+	public static final int[] ITEMS_FARM_FISH = { 349 };
+	public static final int[] ITEMS_FARM_MEAT = { 319, 344, 363, 365 };
+	public static final int[] ITEMS_FARM_COOKED = { 350, 320, 363, 365 };
+
+	public static final int[] ENTETIES_FARMABLE = { 90, 91, 92, 93, 96 };
+	public static final int[] ENTETIES_TAMABLE = { 95, 98, 100 };
+	public static final int[] ENTETIES_HOSTILE = { 50, 51, 52, 53, 54, 55, 56,
+			57, 58, 59, 60, 61, 62, 63, 64, 66, 67 };
 
 	private static String CMD_PREFIX = "\\.";
 	private static int LAG = 5;
 	public double TORCH_THRESHOLD = 0.2;
 
 	/** KeyBinding - http://minecraft.gamepedia.com/Key_codes */
-	public static KeyBinding keyBindBotPause = new KeyBinding("key.botPause", 23,
-			"key.categories.bot"); // "I"
-	public static KeyBinding keyBindBotMenu = new KeyBinding("key.botMenu", 24,
-			"key.categories.bot"); // "O"
-	public static KeyBinding keyBindBotMacro = new KeyBinding("key.botMacro", 25,
-			"key.categories.bot"); // "P"
-	
+	public static KeyBinding keyBindBotModeDemolisher = new KeyBinding(
+			"key.botModeMiner", 22, "key.categories.bot"); // "U"
+	public static KeyBinding keyBindBotModeWoodcutter = new KeyBinding(
+			"key.botModeWoodcutter", 23, "key.categories.bot"); // "I"
+	public static KeyBinding keyBindBotFacing = new KeyBinding("key.botFacing",
+			24, "key.categories.bot"); // "O" //TODO add status info. e.g. mode
+	// the bot is in and progress
+	public static KeyBinding keyBindBotPause = new KeyBinding("key.botPause",
+			25, "key.categories.bot"); // "P"
+	public static KeyBinding keyBindBotModes = new KeyBinding("key.botModes",
+			36, "key.categories.bot"); // "J"
+	public static KeyBinding keyBindBotSettings = new KeyBinding(
+			"key.botSettings", 37, "key.categories.bot"); // "K"
+	public static KeyBinding keyBindBotAction = new KeyBinding(
+			"key.botActions", 38, "key.categories.bot"); // "L"
+	public static KeyBinding keyBindBotStop = new KeyBinding("key.botStop", 39,
+			"key.categories.bot"); // ";"
+
 	/** Initialize everything. */
 	public MinecraftBot(Minecraft parMc) {
-
 		mb = this;
 		tickCount = 0;
 		parMc.playerController = new MBPlayerControllerMP(parMc,
@@ -88,7 +113,6 @@ public class MinecraftBot {
 		inventory = new MBInventory();
 		this.mc = parMc;
 		if (firstInstance) {
-
 			KeyBinding[] arr1and2 = new KeyBinding[parMc.gameSettings.keyBindings.length
 					+ keyList.length];
 			System.arraycopy(parMc.gameSettings.keyBindings, 0, arr1and2, 0,
@@ -105,14 +129,23 @@ public class MinecraftBot {
 
 	/** Entry point of the bot for each game tick */
 	public void tick() {
-
 		/* Key listener */
-		if (this.keyBindBotMacro.isPressed())
-			manager = MBManager.chopStuff(this, BLOCKS_WOOD);
-		if (this.keyBindBotMenu.isPressed())
+		if (this.keyBindBotModeDemolisher.isPressed())
+			manager = MBManager.actionChopSquare(this, new MBSquare(mb));
+		if (this.keyBindBotModeWoodcutter.isPressed())
+			manager = MBManager.actionChopStuff(this, BLOCKS_WOOD);
+		if (this.keyBindBotFacing.isPressed())
 			tools.s("Face: " + mc.objectMouseOver.sideHit);
 		if (this.keyBindBotPause.isPressed())
-			manager = MBManager.chopSquare(this, new MBSquare(mb));
+			manager = MBManager.actionPause(this);
+		if (this.keyBindBotModes.isPressed())
+			manager = MBManager.menuModes(this);
+		if (this.keyBindBotSettings.isPressed())
+			manager = MBManager.menuSettings(this);
+		if (this.keyBindBotAction.isPressed())
+			manager = MBManager.menuActions(this);
+		if (this.keyBindBotStop.isPressed())
+			manager.stop();
 
 		/* If exist, run manager and delete it if return value is false */
 		if (manager != null && manager.run() != MANAGER_RETURN.KEEP_RUNNING)
@@ -121,7 +154,6 @@ public class MinecraftBot {
 		/* FPS counter */
 		tickCount++;
 		if (System.currentTimeMillis() - lastTick > 5000) {
-
 			System.out.println("TICK/sec: "
 					+ (System.currentTimeMillis() - lastTick) / tickCount);
 			lastTick = System.currentTimeMillis();
@@ -129,8 +161,10 @@ public class MinecraftBot {
 		}
 	}
 
-	public static KeyBinding keyList[] = { keyBindBotPause, keyBindBotMenu,
-			keyBindBotMacro };
+	public static KeyBinding keyList[] = { keyBindBotModeDemolisher,
+			keyBindBotModeWoodcutter, keyBindBotFacing, keyBindBotModes,
+			keyBindBotPause, keyBindBotSettings, keyBindBotAction,
+			keyBindBotStop };
 
 	private void arraySort() {
 		Arrays.sort(BLOCKS_LAVA_WATER_FIRE);
@@ -180,7 +214,6 @@ public class MinecraftBot {
 		 *            : False move beside the block. True move to the block.
 		 */
 		BotMove(MBVec vec, boolean moveInside) {
-
 			this(vec, moveInside, "Noname");
 		}
 
@@ -191,7 +224,6 @@ public class MinecraftBot {
 		 *            : False move beside the block. True move to the block.
 		 */
 		BotMove(MBVec vec, boolean moveInside, String parName) {
-
 			tools.p("New BotMove to vec " + vec.toString());
 			if (moveInside)
 				path = new BotPath(new MBVec(0, -1, 0), vec, parName);
@@ -207,7 +239,6 @@ public class MinecraftBot {
 		 *            : False move beside the block. True move to the block.
 		 */
 		BotMove(BotPath parPath) {
-
 			tools.p("New BotMove following path to "
 					+ parPath.path.peek().toString());
 			path = parPath;
@@ -216,7 +247,6 @@ public class MinecraftBot {
 
 		/** Find and Go to specified items */
 		BotMove(int[] items, String parName) {
-
 			tools.p("New BotMove to items " + Arrays.toString(items));
 			path = new BotPath(new MBVec(0, -1, 0), items, parName);
 			unpressAll();
@@ -228,21 +258,18 @@ public class MinecraftBot {
 		 * task is not finished.
 		 */
 		public void run(Stack<Bot> lst) {
-
 			if (path.path != null) {
-
 				if (currStep != null && currStep.distanceToFeet() < 0.5) {
 					path.path.remove(currStep);
 					currStep = null;
 				}
 				if (currStep == null) {
 					currStep = getNextStep();
-					tools.p("BotMove  - Distance left: "
+					tools.p("BotMove - Distance left: "
 							+ (currStep != null ? currStep.distanceToFeet()
 									: "Destination Reach"));
 				}
 				if (currStep != null) {
-
 					if (currStep.distanceToFeet() >= 2) {
 
 						currStep = null;
@@ -253,7 +280,6 @@ public class MinecraftBot {
 						path = new BotPath(new MBVec(0, -1, 0),
 								path.path.firstElement(), path.name);
 					} else {
-
 						tools.lookAt(currStep, 0f);
 						if (currStep.yCoord > mc.thePlayer.posY - 1
 								&& !scanner.scanVec(new MBVec(0, -1, 1),
@@ -267,14 +293,12 @@ public class MinecraftBot {
 						btnForward = true;
 					}
 				} else {
-
 					unpressAll();
 					refreshKeys();
 					lst.pop();
 					return;
 				}
 			} else if (path.aStar == null) {
-
 				unpressAll();
 				refreshKeys();
 				lst.pop();
@@ -286,7 +310,6 @@ public class MinecraftBot {
 
 		/** Halt the bot */
 		public void unpressAll() {
-
 			btnForward = false;
 			btnBackward = false;
 			btnSneak = false;
@@ -295,7 +318,6 @@ public class MinecraftBot {
 
 		/** Refresh Keys */
 		public void refreshKeys() {
-
 			if (mc.gameSettings.keyBindForward.getIsKeyPressed() != btnForward)
 				mc.gameSettings.keyBindForward
 						.setKeyBindState(
@@ -313,9 +335,7 @@ public class MinecraftBot {
 		}
 
 		private MBVec getNextStep() {
-
 			if (path.path.size() < 1) {
-
 				// path.path = null;
 				return null;
 			}
@@ -325,16 +345,13 @@ public class MinecraftBot {
 
 	/** Bot for inventory management */
 	class MBInventory {
-
 		int[] targetItems;
 
 		public boolean equip(int item) {
-
 			return equip(new int[] { item });
 		}
 
 		public boolean equip(int[] items) {
-
 			targetItems = items;
 			boolean actionNeeded = !isHoldingItems()
 					&& tools.countItems(targetItems) > 0;
@@ -344,7 +361,6 @@ public class MinecraftBot {
 		}
 
 		public boolean equip(MBVec vec) {
-
 			targetItems = new int[] { 0 };
 			if (scanner.scanVec(vec, BLOCKS_ORE))
 				targetItems = ITEMS_PICKAXES;
@@ -361,14 +377,11 @@ public class MinecraftBot {
 		 * task is not finished.
 		 */
 		private void run() {
-
 			if (!isHoldingItems()) {
-
 				int tmpSlot = getTargetItemSlot();
 				if (tmpSlot != -1) {
-
 					// Item not in hand and present in inventory
-					tools.p("BotInventory  - Swapping item in slot " + tmpSlot
+					tools.p("BotInventory - Swapping item in slot " + tmpSlot
 							+ " for item in slot "
 							+ (36 + mc.thePlayer.inventory.currentItem));
 					mc.playerController.windowClick(
@@ -386,7 +399,6 @@ public class MinecraftBot {
 		}
 
 		public boolean isHoldingItems() {
-
 			int itemId = mc.thePlayer.getCurrentEquippedItem() == null ? -1
 					: Item.getIdFromItem(mc.thePlayer.getCurrentEquippedItem()
 							.getItem());
@@ -422,23 +434,19 @@ public class MinecraftBot {
 
 	/** Bot for mining */
 	class BotMiner implements Bot {
-
 		MBVec target;
 		int[] items;
 		int lag;
 		boolean flag;
 
 		BotMiner(MBVec vec) {
-
 			target = vec.cP();
 			lag = LAG;
 			flag = true;
 		}
 
 		public void run(Stack<Bot> lst) {
-
 			if (scanner.isTouchingLavaWater(target)) {
-
 				lst.pop();
 				return;
 			}
@@ -572,7 +580,6 @@ public class MinecraftBot {
 		 * task is not finished.
 		 */
 		public void run(Stack<Bot> lst) {
-
 			if (target_bis == null) {
 				lst.pop();
 				return;
@@ -597,50 +604,47 @@ public class MinecraftBot {
 					lst.pop();
 				}
 			}
-
 			return;
 		}
 
 		private MBVec getVec(MBVec vec) {
-
 			int face = -1;
 			MBVec buffVec = vec.getVec();
 
 			buffVec.yCoord -= 1;
 			if (!scanner.scanVec(buffVec, BLOCKS_EMPTY_LAVA_WATER_FIRE)) {
-
 				buffVec.side = 1;
 				return buffVec;
 			}
+
 			buffVec.yCoord += 2;
 			if (!scanner.scanVec(buffVec, BLOCKS_EMPTY_LAVA_WATER_FIRE)) {
-
 				buffVec.side = 0;
 				return buffVec;
 			}
+
 			buffVec.yCoord -= 1;
 			buffVec.zCoord -= 1;
 			if (!scanner.scanVec(buffVec, BLOCKS_EMPTY_LAVA_WATER_FIRE)) {
-
 				buffVec.side = 3;
 				return buffVec;
 			}
+
 			buffVec.zCoord += 2;
 			if (!scanner.scanVec(buffVec, BLOCKS_EMPTY_LAVA_WATER_FIRE)) {
-
 				buffVec.side = 2;
 				return buffVec;
 			}
+
 			buffVec.zCoord -= 1;
 			buffVec.xCoord -= 1;
 			if (!scanner.scanVec(buffVec, BLOCKS_EMPTY_LAVA_WATER_FIRE)) {
-
 				buffVec.side = 5;
 				return buffVec;
 			}
+
 			buffVec.xCoord += 2;
 			if (!scanner.scanVec(buffVec, BLOCKS_EMPTY_LAVA_WATER_FIRE)) {
-
 				buffVec.side = 4;
 				return buffVec;
 			}
@@ -652,7 +656,6 @@ public class MinecraftBot {
 
 	/** Path calculator */
 	class BotPath implements Bot {
-
 		private class Node implements Comparable<Node> {
 
 			protected int x, y, z;
@@ -743,7 +746,6 @@ public class MinecraftBot {
 				int[] intList = getIds();
 
 				if (Arrays.binarySearch(BLOCKS_EMPTY, intList[3]) >= 0) {
-
 					if (Arrays.binarySearch(BLOCKS_EMPTY_WATER, intList[2]) >= 0
 							&& Arrays.binarySearch(
 									BLOCKS_EMPTY_LAVA_WATER_FIRE, intList[1]) < 0)
@@ -769,7 +771,6 @@ public class MinecraftBot {
 				}
 
 				if (Arrays.binarySearch(BLOCKS_EMPTY, intList[8]) >= 0) {
-
 					if (Arrays.binarySearch(BLOCKS_EMPTY_WATER, intList[7]) >= 0
 							&& Arrays.binarySearch(
 									BLOCKS_EMPTY_LAVA_WATER_FIRE, intList[6]) < 0)
@@ -795,7 +796,6 @@ public class MinecraftBot {
 				}
 
 				if (Arrays.binarySearch(BLOCKS_EMPTY, intList[13]) >= 0) {
-
 					if (Arrays.binarySearch(BLOCKS_EMPTY_WATER, intList[12]) >= 0
 							&& Arrays.binarySearch(
 									BLOCKS_EMPTY_LAVA_WATER_FIRE, intList[11]) < 0)
@@ -822,7 +822,6 @@ public class MinecraftBot {
 				}
 
 				if (Arrays.binarySearch(BLOCKS_EMPTY, intList[18]) >= 0) {
-
 					if (Arrays.binarySearch(BLOCKS_EMPTY_WATER, intList[17]) >= 0
 							&& Arrays.binarySearch(
 									BLOCKS_EMPTY_LAVA_WATER_FIRE, intList[16]) < 0)
@@ -880,21 +879,17 @@ public class MinecraftBot {
 			}
 
 			protected List<Node> getBros() {
-
 				List<Node> broList = new ArrayList<Node>();
 				int[] intList = getIds();
 
 				if (y == y2 || y + 1 == y2) {
-
 					if (x + 1 == x2 || x - 1 == x2) {
-
 						if (z == z2) {
 							broList.add(new Node(this.parent, x, y, z, x, y, z,
 									g));
 							return broList;
 						}
 					} else if (x == x2) {
-
 						if (z - 1 == z2 || z + 1 == z2) {
 							broList.add(new Node(this.parent, x, y, z, x, y, z,
 									g));
@@ -1223,9 +1218,7 @@ public class MinecraftBot {
 									z2, 0, +1, -1, g + dx + 16, items, flag));
 					}
 				}
-
 				return broList;
-
 			}
 		}
 
@@ -1258,7 +1251,6 @@ public class MinecraftBot {
 			}
 
 			public void run() {
-
 				List<Node> tmpList = new ArrayList<Node>();
 				long tick = System.currentTimeMillis();
 
@@ -1273,7 +1265,7 @@ public class MinecraftBot {
 								+ ") - Bloque. Aucun chemin trouve");
 						search = false;
 					}
-					;
+
 					closeNode.add(currNode);
 					if (currNode.isLast()) {
 						status = 1;
@@ -1304,7 +1296,6 @@ public class MinecraftBot {
 			}
 
 			private void parsePath() {
-
 				if (parent.path == null)
 					parent.path = new Stack<MBVec>();
 				parent.path.clear();
@@ -1322,7 +1313,6 @@ public class MinecraftBot {
 				tools.p("AStar (" + name + ") - Path ready. (Size : "
 						+ parent.path.size() + " blocks.)");
 			}
-
 		}
 
 		public BotPath(MBVec parVec, String parName) {
@@ -1368,25 +1358,21 @@ public class MinecraftBot {
 		}
 
 		public void run(Stack<Bot> lst) {
-
 			if (aStar != null && path == null)
 				return;
 			else if (path != null)
 				return;
 			else {
-
 				lst.pop();
 				return;
 			}
 		}
 
 		public boolean isSearching() {
-
 			return aStar != null;
 		}
 
 		public boolean isReady() {
-
 			return path != null;
 		}
 
@@ -1394,7 +1380,6 @@ public class MinecraftBot {
 
 	/** Handle new chat message. Return true if message is for bot. */
 	public class MBChat {
-
 		public boolean isForBot(String msg) {
 			String cmd = isForBot_do(msg);
 			if (cmd != "")
@@ -1403,7 +1388,6 @@ public class MinecraftBot {
 		}
 
 		private String isForBot_do(String s) {
-
 			String[] str = s.split(CMD_PREFIX, 2);
 			if (str[0].compareTo("") == 0 && str.length > 1)
 				return str[1];
@@ -1434,8 +1418,8 @@ public class MinecraftBot {
 					}
 					if (args.length > 4)
 						return "";
-					manager = MBManager.chopSquare(mb, new MBSquare(mb, buffX,
-							buffY, buffZ, left));
+					manager = MBManager.actionChopSquare(mb, new MBSquare(mb,
+							buffX, buffY, buffZ, left));
 				} else if (cmd[0].toLowerCase().compareTo("chop") == 0) {
 					int itemId = 1, qnt = 0;
 					if (args.length >= 1) {
@@ -1446,7 +1430,8 @@ public class MinecraftBot {
 					}
 					if (args.length > 2)
 						return "";
-					manager = MBManager.chopStuff(mb, new int[] { itemId });
+					manager = MBManager.actionChopStuff(mb,
+							new int[] { itemId });
 				} else if (cmd[0].toLowerCase().compareTo("torch") == 0) {
 					boolean enabled = true;
 					double threshold = 0.2;
@@ -1490,7 +1475,6 @@ public class MinecraftBot {
 			} catch (NumberFormatException e) {
 				return "";
 			}
-
 			return "ANYTHING_GOES_HERE";
 		}
 	}
@@ -1590,7 +1574,7 @@ public class MinecraftBot {
 
 		/** Level vec height one block above ground. */
 		MBVec aH() {
-			tools.p("MBVec  - aH " + toString());
+			tools.p("MBVec - aH " + toString());
 			while (Arrays.binarySearch(BLOCKS_EMPTY_WATER, getId()) >= 0)
 				yCoord -= 1;
 			while (Arrays.binarySearch(BLOCKS_EMPTY_WATER, getId()) < 0)
@@ -1663,9 +1647,7 @@ public class MinecraftBot {
 
 	/** Tools for environment scanning */
 	class MBScanner {
-
 		boolean isTouchingLavaWater(MBVec vec) {
-
 			return scanVec(vec, BLOCKS_LAVA_WATER, new int[] { 0, 1, 0, 0, -1,
 					0, 1, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, -1 });
 		}
@@ -1675,24 +1657,20 @@ public class MinecraftBot {
 			boolean result = false;
 
 			for (int i = 0; i < delta.length / 3; i++) {
-
 				result = result
 						|| scanVec(vec.getVec(delta[i], delta[i + 1],
 								delta[i + 2]), ids);
 			}
-
 			return result;
 		}
 
 		boolean scanVec(MBVec vec, int[] ids) {
-
 			return Arrays.binarySearch(ids, vec.getId()) >= 0;
 		}
 	}
 
 	/** Random tools */
 	class MBTools {
-
 		void p(String msg) {
 			System.out.println("MinecraftBot: " + msg);
 		}
@@ -1779,7 +1757,9 @@ public class MinecraftBot {
 		}
 
 		private void lookAt(float yaw, float pitch) {
-			mc.thePlayer.setAngles(yaw, pitch);
+			// mc.thePlayer.setRotation(yaw, pitch);
+			mc.thePlayer.setPositionAndRotation(mc.thePlayer.posX,
+					mc.thePlayer.posY, mc.thePlayer.posZ, yaw, pitch);
 		}
 
 		int getSide() {
@@ -1815,7 +1795,7 @@ public class MinecraftBot {
 				break;
 			}
 			}
-			;
+
 			return tmpVec;
 		} // Associate player yaw to block side
 
